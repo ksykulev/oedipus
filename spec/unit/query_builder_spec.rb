@@ -175,6 +175,17 @@ describe Oedipus::QueryBuilder do
     it "includes the ID and the attributes" do
       builder.insert(3, title: "example", views: 9).should == ["INSERT INTO posts (title, views, id) VALUES (?, ?, ?)", "example", 9, 3]
     end
+    it "inserts MVAs" do
+      builder.insert(3, title: "example", views: [9,10]).should == ["INSERT INTO posts (title, views, id) VALUES (?, (?, ?), ?)", "example", 9, 10, 3]
+    end
+    it "inserts multiple records" do
+      builder.insert([1,2], [{title: "example", views: 9}, {title: "example two", views: 10}]).should ==
+        ["INSERT INTO posts (title, views, id) VALUES (?, ?, ?), (?, ?, ?)", "example", 9, 1, "example two", 10, 2]
+    end
+    it "inserts multiple records with MVA" do
+      builder.insert([1,2], [{title: "example", views: [9,10]}, {title: "example two", views: [10,11]}]).should ==
+        ["INSERT INTO posts (title, views, id) VALUES (?, (?, ?), ?), (?, (?, ?), ?)", "example", 9, 10, 1, "example two", 10, 11, 2]
+    end
   end
 
   describe "#update" do
@@ -194,6 +205,17 @@ describe Oedipus::QueryBuilder do
   describe "#replace" do
     it "includes the ID and the attributes" do
       builder.replace(3, title: "example", views: 9).should == ["REPLACE INTO posts (title, views, id) VALUES (?, ?, ?)", "example", 9, 3]
+    end
+    it "inserts MVAs" do
+      builder.replace(3, title: "example", views: [9,10]).should == ["REPLACE INTO posts (title, views, id) VALUES (?, (?, ?), ?)", "example", 9, 10, 3]
+    end
+    it "inserts multiple records" do
+      builder.replace([1,2], [{title: "example", views: 9}, {title: "example two", views: 10}]).should ==
+        ["REPLACE INTO posts (title, views, id) VALUES (?, ?, ?), (?, ?, ?)", "example", 9, 1, "example two", 10, 2]
+    end
+    it "inserts multiple records with MVA" do
+      builder.replace([1,2], [{title: "example", views: [9,10]}, {title: "example two", views: [10,11]}]).should ==
+        ["REPLACE INTO posts (title, views, id) VALUES (?, (?, ?), ?), (?, (?, ?), ?)", "example", 9, 10, 1, "example two", 10, 11, 2]
     end
   end
 

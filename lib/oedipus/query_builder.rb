@@ -126,21 +126,31 @@ module Oedipus
     end
 
     def into(type, id, attributes)
-      attributes.merge!(id: id)
+      id = [id] unless id.is_a?(Array)
+      attributes = [attributes] unless attributes.is_a?(Array)
+      columns = attributes.first.keys + [:id]
+      values = []
 
-      value_substitute_str = attributes.values.collect do |attribute|
-        attribute.is_a?(Array) ? "(#{(['?'] * attribute.size).join(', ')})" : '?'
-      end.join(', ')
+      value_substitute_str = id.lazy.zip(attributes).collect do |value_set|
+        #[<id>, {:<column_name> => <value>}]
+        i, v = value_set
+
+        v.merge({:id => i}).collect do |name, value|
+          values << value
+          value.is_a?(Array) ? "(#{(['?'] * value.size).join(', ')})" : '?'
+        end.join(', ')
+
+      end.force.join('), (')
 
       [
         [
           type,
           "INTO #{@index_name}",
-          "(#{attributes.keys.join(', ')})",
+          "(#{columns.join(', ')})",
           "VALUES",
           "(#{value_substitute_str})"
         ].join(" "),
-        *attributes.values.flatten
+        *values.flatten
       ]
     end
 
