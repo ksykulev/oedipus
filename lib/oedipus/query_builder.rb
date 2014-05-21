@@ -101,7 +101,10 @@ module Oedipus
     # @return [String]
     #   the SphinxQL to delete the record
     def delete(id)
-      ["DELETE FROM #{@index_name} WHERE id = ?", id]
+      [
+        "DELETE FROM #{@index_name} WHERE id #{id.is_a?(Array) ? "IN(#{(['?'] * id.size).join(', ')})" : '= ?'}",
+        *id
+      ]
     end
 
     private

@@ -232,5 +232,8 @@ describe Oedipus::QueryBuilder do
     it "includes the ID" do
       builder.delete(3).should == ["DELETE FROM posts WHERE id = ?", 3]
     end
+    it "deletes multiple records by id" do
+      builder.delete([1,2,3]).should == ["DELETE FROM posts WHERE id IN(?, ?, ?)", 1, 2, 3]
+    end
   end
 end
