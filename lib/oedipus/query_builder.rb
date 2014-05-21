@@ -73,9 +73,9 @@ module Oedipus
         [
           "UPDATE #{@index_name} SET",
           set_attrs,
-          "WHERE id = ?"
+          "WHERE id #{id.is_a?(Array) ? "IN(#{(['?'] * id.size).join(', ')})" : '= ?'}"
         ].join(" "),
-        *bind_values.push(id)
+        *bind_values.push(id).flatten
       ]
     end
 
@@ -174,9 +174,13 @@ module Oedipus
     end
 
     def update_attributes(attributes)
+      values = []
       [
-        attributes.keys.map{ |k| "#{k} = ?" }.join(", "),
-        *attributes.values
+        attributes.collect do |name, value|
+          values << value
+          "#{name} = " + (value.is_a?(Array) ? "(#{(['?'] * value.size).join(', ')})" : '?')
+        end.join(', '),
+        *values.flatten
       ]
     end
 

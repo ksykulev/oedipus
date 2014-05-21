@@ -200,6 +200,15 @@ describe Oedipus::QueryBuilder do
       sql[0].should =~ /UPDATE posts SET title = \?, views = \?/
       sql.slice(1..-1).should == ["example", 9, 3]
     end
+    it "updates MVAs" do
+      builder.update(3, likes: 100, views: [9,10]).should == ["UPDATE posts SET likes = ?, views = (?, ?) WHERE id = ?", 100, 9, 10, 3]
+    end
+    it "updates multiple records" do
+      builder.update([3,4], published: 0, tagged: 1).should == ["UPDATE posts SET published = ?, tagged = ? WHERE id IN(?, ?)", 0, 1, 3, 4]
+    end
+    it "updates multiple records with MVA" do
+      builder.update([3,4], likes: 100, views: [9,10]).should == ["UPDATE posts SET likes = ?, views = (?, ?) WHERE id IN(?, ?)", 100, 9, 10, 3, 4]
+    end
   end
 
   describe "#replace" do
